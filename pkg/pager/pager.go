@@ -71,8 +71,10 @@ func (p *DefaultPager) PaginateUserRoles(allUserRoles []*graph.UserRoles, page *
 		}
 	}
 
-	// Handle offset beyond total count
-	if offset >= totalCount {
+	// Handle offset beyond total count. offset < 0 or end < offset means the
+	// client-supplied page/limit overflowed int during the bounds arithmetic;
+	// treat that as an out-of-range page rather than panicking on the slice.
+	if offset < 0 || end < offset || offset >= totalCount {
 		return []*graph.UserRoles{}, &graph.PageInfo{
 			Count:           0,
 			TotalCount:      totalCount,
@@ -139,8 +141,10 @@ func (p *DefaultPager) PaginateUsers(allUsers []*graph.User, page *graph.PageInp
 		}
 	}
 
-	// Handle offset beyond total count
-	if offset >= totalCount {
+	// Handle offset beyond total count. offset < 0 or end < offset means the
+	// client-supplied page/limit overflowed int during the bounds arithmetic;
+	// treat that as an out-of-range page rather than panicking on the slice.
+	if offset < 0 || end < offset || offset >= totalCount {
 		return []*graph.User{}, &graph.PageInfo{
 			Count:           0,
 			TotalCount:      totalCount,
